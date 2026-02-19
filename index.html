@@ -8,28 +8,26 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    :root { --primary-blue: #0d6efd; --bg-gray: #f0f2f5; }
-    body { background-color: var(--bg-gray); font-family: 'Prompt', sans-serif; padding: 10px; }
+    body { font-family: 'Prompt', sans-serif; background-color: #f0f2f5; padding: 10px; }
     .app-container { max-width: 500px; margin: auto; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
-    .app-header { background: var(--primary-blue); color: white; padding: 25px; text-align: center; }
+    .app-header { background: #0d6efd; color: white; padding: 25px; text-align: center; }
     .form-section { padding: 20px; }
     .farmer-info-card { background: #f8faff; border: 1px dashed #0d6efd; border-radius: 12px; padding: 15px; margin: 15px 0; }
     .info-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
     #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
-    .btn-submit { padding: 15px; font-weight: 600; border-radius: 12px; }
   </style>
 </head>
 <body>
 
 <div id="loader">
   <div class="spinner-border text-primary"></div>
-  <p class="mt-2 fw-bold">กำลังประมวลผล...</p>
+  <p class="mt-2 fw-bold">กำลังบันทึกข้อมูล...</p>
 </div>
 
 <div class="app-container">
-  <div class="app-header shadow-sm">
+  <div class="app-header">
     <h3 class="mb-1">ระบบจองคิวรถ</h3>
-    <p class="mb-0 opacity-75 small">ดึงข้อมูลจากระบบ Google Sheets</p>
+    <p class="mb-0 opacity-75 small">ตรวจสอบโควตาและจองคิว</p>
   </div>
 
   <div class="form-section">
@@ -66,8 +64,8 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label small fw-bold text-primary">🔢 เลขโควตาชาวไร่ (8 หลัก)</label>
-        <input type="number" id="qInput" class="form-control border-primary" placeholder="พิมพ์เลขโควตาเพื่อค้นหา..." oninput="searchData()">
+        <label class="form-label small fw-bold text-primary">🔢 เลขโควตาชาวไร่</label>
+        <input type="number" id="qInput" class="form-control border-primary" placeholder="ระบุเลขโควตาเพื่อค้นหา..." oninput="searchData()">
       </div>
 
       <div class="farmer-info-card shadow-sm">
@@ -76,20 +74,20 @@
         <div class="info-line"><span>เบอร์โทร:</span><span id="vPhone" class="text-success">-</span></div>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-submit w-100 shadow-sm mt-3">ยืนยันการจองคิว</button>
+      <button type="submit" class="btn btn-primary w-100 p-3 fw-bold mt-2" style="border-radius:12px;">ยืนยันการจองคิว</button>
     </form>
   </div>
 </div>
 
 <script>
-  // ลิงก์ HTML ที่คุณส่งมา (ชีทสถานะ)
-  const SOURCE_HTML_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRbEDGmPQBvhjfD6GmwALpmrTH8jNuEGoe3eUVANXZtvFuG8PTNDFNOsUfi6xZYO98D8JBY3ghQ82CQ/pubhtml?gid=151049282&single=true';
+  // ลิงก์ดึงข้อมูลจากไฟล์ที่ 1 (ปรับเป็น gid=0 ตามลิงก์ใหม่ของคุณ)
+  const FETCH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRbEDGmPQBvhjfD6GmwALpmrTH8jNuEGoe3eUVANXZtvFuG8PTNDFNOsUfi6xZYO98D8JBY3ghQ82CQ/pub?gid=0&single=true&output=csv';
   
-  // URL Web App จาก Google Apps Script (ไฟล์ปลายทาง)
-  const SCRIPT_URL = 'ใส่_URL_WEB_APP_ที่นี่';
+  // URL ของ Web App จาก Google Apps Script (ไฟล์ปลายทาง)
+  const SCRIPT_URL = 'ใส่_WEB_APP_URL_ของคุณที่นี่';
 
   let farmerData = null;
-  let searchTimer;
+  let timer;
 
   window.onload = () => {
     document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
@@ -103,47 +101,34 @@
     document.getElementById('iTrailer').required = isP;
   }
 
-  // ค้นหาข้อมูลจากหน้า HTML ผ่าน Proxy
   async function searchData() {
     const q = document.getElementById('qInput').value.trim();
     if (q.length < 3) { resetInfo(); return; }
 
     document.getElementById('vFarmer').innerText = "กำลังค้นหา...";
-    
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(async () => {
-      try {
-        // ใช้ Proxy เพื่อดึงข้อมูลข้ามโดเมน
-        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(SOURCE_HTML_URL + '&t=' + Date.now());
-        const response = await fetch(proxyUrl);
-        const json = await response.json();
-        
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(json.contents, 'text/html');
-        const rows = Array.from(doc.querySelectorAll('tr'));
-        
-        let found = null;
-        for (let row of rows) {
-          const cells = Array.from(row.querySelectorAll('td'));
-          if (cells.length > 0 && cells[0].innerText.trim() === q) {
-            found = cells.map(c => c.innerText.trim());
-            break;
-          }
-        }
+    clearTimeout(timer);
 
+    timer = setTimeout(async () => {
+      try {
+        // ดึงข้อมูลผ่าน Proxy เพื่อป้องกันการบล็อก
+        const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(FETCH_URL + '&t=' + Date.now()));
+        const json = await response.json();
+        const rows = json.contents.split('\n').map(r => r.split(',').map(c => c.replace(/"/g, '').trim()));
+        
+        const found = rows.find(r => r[0] === q);
         if (found) {
-          document.getElementById('vFarmer').innerText = found[1] || "-";
-          document.getElementById('vOfficer').innerText = found[2] || "-";
+          document.getElementById('vFarmer').innerText = found[1];
+          document.getElementById('vOfficer').innerText = found[2];
           document.getElementById('vPhone').innerText = found[3] || "-";
           farmerData = { name: found[1], officer: found[2], phone: found[3] || "-" };
         } else {
-          document.getElementById('vFarmer').innerText = "❌ ไม่พบโควตานี้";
+          document.getElementById('vFarmer').innerText = "❌ ไม่พบโควตา";
           farmerData = null;
         }
       } catch (e) {
-        document.getElementById('vFarmer').innerText = "⚠️ การเชื่อมต่อติดขัด";
+        document.getElementById('vFarmer').innerText = "⚠️ เชื่อมต่อล้มเหลว";
       }
-    }, 600);
+    }, 500);
   }
 
   function resetInfo() {
@@ -155,7 +140,7 @@
 
   document.getElementById('bookingForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!farmerData) return Swal.fire('แจ้งเตือน', 'ไม่พบข้อมูลเลขโควตา', 'warning');
+    if (!farmerData) return Swal.fire('แจ้งเตือน', 'ไม่พบข้อมูลชาวไร่', 'warning');
 
     document.getElementById('loader').style.display = 'flex';
     const payload = {
