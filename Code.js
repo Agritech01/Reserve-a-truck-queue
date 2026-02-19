@@ -7,7 +7,7 @@ function doPost(e) {
     const ss = SpreadsheetApp.openById(DEST_SHEET_ID);
     let sheet = ss.getSheetByName(DEST_SHEET_NAME) || ss.insertSheet(DEST_SHEET_NAME);
     
-    // ตรวจสอบหัวตาราง
+    // สร้างหัวตารางถ้ายังไม่มี
     if (sheet.getLastRow() === 0) {
       sheet.appendRow(["วันที่เข้า", "ช่วงเวลา", "ประเภทรถ", "ทะเบียนรถ", "เลขโควตา", "ชื่อชาวไร่", "ชื่อนักเกษตร", "เบอร์โทร"]);
     }
@@ -24,7 +24,7 @@ function doPost(e) {
       sheet.appendRow(rowData);
     }
 
-    return ContentService.createTextOutput(JSON.stringify({ success: true, message: "บันทึกสำเร็จ" }))
+    return ContentService.createTextOutput(JSON.stringify({ success: true, message: "✅ บันทึกข้อมูลสำเร็จ!" }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.toString() }))
