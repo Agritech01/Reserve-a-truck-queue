@@ -1,134 +1,55 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0d6efd">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
+  <title>ระบบจองคิวรถ</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
   <style>
-    :root {
-      --primary-blue: #0d6efd;
-      --bg-gray: #f0f2f5;
-    }
-    body { 
-      background-color: var(--bg-gray); 
-      font-family: 'Prompt', sans-serif; 
-      -webkit-tap-highlight-color: transparent;
-    }
-    /* ปรับแต่ง Card ให้ดูเหมือนแอป */
-    .app-container {
-      max-width: 480px;
-      margin: auto;
-      min-height: 100vh;
-      background: white;
-      box-shadow: 0 0 20px rgba(0,0,0,0.05);
-    }
-    .app-header {
-      background: var(--primary-blue);
-      color: white;
-      padding: 30px 20px;
-      border-bottom-left-radius: 30px;
-      border-bottom-right-radius: 30px;
-      text-align: center;
-      margin-bottom: 25px;
-    }
+    :root { --primary-blue: #0d6efd; --bg-gray: #f0f2f5; }
+    body { background-color: var(--bg-gray); font-family: 'Prompt', sans-serif; }
+    .app-container { max-width: 480px; margin: auto; min-height: 100vh; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+    .app-header { background: var(--primary-blue); color: white; padding: 30px 20px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 25px; }
     .form-section { padding: 0 20px 30px 20px; }
-    
-    /* ปรับแต่ง Input ให้กดง่ายขึ้น */
-    .form-control, .form-select {
-      border-radius: 12px;
-      padding: 12px 15px;
-      border: 1px solid #dee2e6;
-      font-size: 1rem;
-      margin-bottom: 5px;
-    }
-    .form-control:focus {
-      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-      border-color: var(--primary-blue);
-    }
-    .form-label {
-      font-weight: 600;
-      font-size: 0.85rem;
-      color: #495057;
-      margin-left: 5px;
-      margin-bottom: 5px;
-    }
-    
-    /* กล่องข้อมูลชาวไร่แบบ Modern */
-    .farmer-info-card {
-      background: #f8faff;
-      border: 1px dashed #0d6efd;
-      border-radius: 15px;
-      padding: 15px;
-      margin: 20px 0;
-    }
-    .info-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      border-bottom: 1px solid #edf2f7;
-      padding-bottom: 5px;
-    }
+    .form-control, .form-select { border-radius: 12px; padding: 12px 15px; margin-bottom: 5px; }
+    .farmer-info-card { background: #f8faff; border: 1px dashed #0d6efd; border-radius: 15px; padding: 15px; margin: 20px 0; }
+    .info-item { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #edf2f7; padding-bottom: 5px; }
     .info-label { color: #718096; font-size: 0.85rem; }
     .info-value { font-weight: 600; color: #2d3748; }
-
-    /* ปุ่มยืนยันขนาดใหญ่ */
-    .btn-submit {
-      border-radius: 15px;
-      padding: 16px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      background: var(--primary-blue);
-      border: none;
-      box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
-      transition: all 0.2s;
-    }
-    .btn-submit:active { transform: scale(0.98); }
-
-    /* Loader แบบนุ่มนวล */
-    #loader {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(255,255,255,0.9); z-index: 10000;
-      justify-content: center; align-items: center; flex-direction: column;
-    }
+    .btn-submit { border-radius: 15px; padding: 16px; font-weight: 600; background: var(--primary-blue); border: none; box-shadow: 0 4px 12px rgba(13,110,253,0.3); }
+    #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 10000; justify-content: center; align-items: center; flex-direction: column; }
   </style>
 </head>
 <body>
 
   <div id="loader">
     <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;"></div>
-    <p class="mt-3 fw-bold text-primary">กำลังบันทึกข้อมูล...</p>
+    <p class="mt-3 fw-bold text-primary">กำลังประมวลผล...</p>
   </div>
 
   <div class="app-container">
     <div class="app-header shadow">
       <h3 class="mb-1">ระบบจองคิวรถ</h3>
-      <p class="mb-0 opacity-75 small">กรุณากรอกข้อมูลเพื่อจองคิวเข้าลาน</p>
+      <p class="mb-0 opacity-75 small">เข้าใช้งานผ่าน GitHub</p>
     </div>
 
     <div class="form-section">
       <form id="bookingForm">
-        
         <div class="mb-3">
           <label class="form-label">📅 วันที่ต้องการเข้า</label>
-          <input type="date" name="date" id="dateInput" class="form-control" required>
+          <input type="date" id="dateInput" class="form-control" required>
         </div>
 
         <div class="mb-3">
           <label class="form-label">⏰ ช่วงเวลา</label>
-          <select name="timeslot" id="timeslot" class="form-select"></select>
+          <select id="timeslot" class="form-select"></select>
         </div>
 
         <div class="mb-3">
           <label class="form-label">🚛 ประเภทรถบรรทุก</label>
-          <select name="carType" id="carTypeSelect" class="form-select" onchange="toggleTrailer()">
+          <select id="carTypeSelect" class="form-select" onchange="toggleTrailer()">
             <option value="สิบล้อ">สิบล้อ</option>
             <option value="หกล้อ">หกล้อ</option>
             <option value="แม่พ่วงและลูกพ่วง">แม่พ่วงและลูกพ่วง</option>
@@ -138,55 +59,39 @@
         </div>
 
         <div class="row g-2 mb-3">
-          <div class="col-12" id="mainPlateCol">
+          <div class="col-12">
             <label class="form-label">🆔 ทะเบียนรถ</label>
-            <input type="text" name="plate" class="form-control" placeholder="89-1617 นม" required>
+            <input type="text" id="plate" class="form-control" placeholder="89-1617 นม" required>
           </div>
           <div class="col-12" id="divTrailer" style="display:none;">
             <label class="form-label text-danger">🆔 ทะเบียนลูกพ่วง</label>
-            <input type="text" name="trailerPlate" id="iTrailer" class="form-control" placeholder="89-1619 นม">
+            <input type="text" id="iTrailer" class="form-control" placeholder="89-1619 นม">
           </div>
         </div>
 
         <div class="mb-3">
           <label class="form-label">🔢 เลขโควตาชาวไร่</label>
-          <input type="number" name="quota" id="qInput" class="form-control form-control-lg border-primary" 
-                 inputmode="numeric" placeholder="ระบุเลขโควตา 8 หลัก" oninput="autoSearch()" required>
+          <input type="number" id="qInput" class="form-control form-control-lg border-primary" inputmode="numeric" placeholder="ระบุเลขโควตา 8 หลัก" oninput="autoSearch()">
         </div>
 
         <div class="farmer-info-card">
-          <div class="info-item">
-            <span class="info-label">ชื่อชาวไร่</span>
-            <span class="info-value text-primary" id="vFarmer">-</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">นักเกษตรดูแล</span>
-            <span class="info-value" id="vOfficer">-</span>
-          </div>
-          <div class="info-item" style="border:none;">
-            <span class="info-label">เบอร์โทรศัพท์นักเกษตร</span>
-            <span class="info-value text-success" id="vPhone">-</span>
-          </div>
-          
-          <input type="hidden" name="farmerName" id="hFarmer">
-          <input type="hidden" name="officerName" id="hOfficer">
-          <input type="hidden" name="phone" id="hPhone">
+          <div class="info-item"><span class="info-label">ชื่อชาวไร่</span><span class="info-value text-primary" id="vFarmer">-</span></div>
+          <div class="info-item"><span class="info-label">นักเกษตรดูแล</span><span class="info-value" id="vOfficer">-</span></div>
+          <div class="info-item" style="border:none;"><span class="info-label">เบอร์โทรศัพท์</span><span class="info-value text-success" id="vPhone">-</span></div>
         </div>
 
-        <button type="submit" id="btnSubmit" class="btn btn-primary btn-submit w-100 mt-2">
-          ยืนยันการจองคิว
-        </button>
+        <button type="submit" id="btnSubmit" class="btn btn-primary btn-submit w-100 mt-2">ยืนยันการจองคิว</button>
       </form>
     </div>
   </div>
 
   <script>
-    // ตั้งค่าพื้นฐาน
+    // --- ตั้งค่า URL ของ Web App ที่ได้จาก Google Apps Script ตรงนี้ ---
+    const SCRIPT_URL = "ใส่_URL_WEB_APP_ที่นี่"; 
+
     window.onload = () => {
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('dateInput').min = today;
       document.getElementById('dateInput').value = today;
-      
       const s = document.getElementById('timeslot');
       const slots = ["08:01 - 09:00", "09:01 - 10:00", "10:01 - 11:00", "11:01 - 12:00", "12:01 - 13:00", "13:01 - 14:00", "14:01 - 15:00", "15:01 - 16:00", "16:01 - 17:00", "17:01 - 18:00", "18:01 - 19:00", "19:01 - 20:00", "20:01 - 21:00", "21:01 - 22:00", "22:01 - 23:00", "23:01 - 00:00", "00:01 - 02:00", "02:01 - 03:00", "03:01 - 04:00", "04:01 - 05:00", "05:01 - 06:00", "06:01 - 07:00", "07:01 - 08:00"];
       slots.forEach(t => s.options.add(new Option(t, t)));
@@ -199,67 +104,67 @@
     }
 
     let timer;
+    let farmerData = {};
+
     function autoSearch() {
       const q = document.getElementById('qInput').value;
       clearTimeout(timer);
-      if(!q) { resetInfo(); return; }
+      if(q.length < 5) return;
       
-      document.getElementById('vFarmer').innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-      
-      timer = setTimeout(() => {
-        google.script.run.withSuccessHandler(res => {
-          if(res && res.success) {
+      document.getElementById('vFarmer').innerText = "กำลังค้นหา...";
+      timer = setTimeout(async () => {
+        try {
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'search', quota: q })
+          });
+          const res = await response.json();
+          if(res.success) {
             document.getElementById('vFarmer').innerText = res.farmerName;
             document.getElementById('vOfficer').innerText = res.officerName;
-            document.getElementById('vPhone').innerText = res.phone || "-";
-            document.getElementById('hFarmer').value = res.farmerName;
-            document.getElementById('hOfficer').value = res.officerName;
-            document.getElementById('hPhone').value = res.phone || "-";
+            document.getElementById('vPhone').innerText = res.phone;
+            farmerData = res;
           } else {
             document.getElementById('vFarmer').innerText = "ไม่พบข้อมูล";
-            resetInfo();
+            farmerData = {};
           }
-        }).getQuotaData(q);
+        } catch (e) { console.error(e); }
       }, 800);
     }
 
-    function resetInfo() {
-      document.getElementById('vOfficer').innerText = "-";
-      document.getElementById('vPhone').innerText = "-";
-      document.getElementById('hFarmer').value = "";
-    }
-
-    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    document.getElementById('bookingForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      if(!document.getElementById('hFarmer').value) {
-        Swal.fire({ icon: 'error', title: 'ไม่พบโควตา', text: 'กรุณาตรวจสอบเลขโควตาอีกครั้ง' });
+      if(!farmerData.farmerName) {
+        Swal.fire('แจ้งเตือน', 'กรุณาระบุโควตาที่ถูกต้อง', 'warning');
         return;
       }
 
       document.getElementById('loader').style.display = 'flex';
-      document.getElementById('btnSubmit').disabled = true;
+      const payload = {
+        action: 'submit',
+        date: document.getElementById('dateInput').value,
+        timeslot: document.getElementById('timeslot').value,
+        carType: document.getElementById('carTypeSelect').value,
+        plate: document.getElementById('plate').value,
+        trailerPlate: document.getElementById('iTrailer').value,
+        quota: document.getElementById('qInput').value,
+        farmerName: farmerData.farmerName,
+        officerName: farmerData.officerName,
+        phone: farmerData.phone
+      };
 
-      google.script.run
-        .withSuccessHandler(msg => {
-          document.getElementById('loader').style.display = 'none';
-          // แก้ไขจุดนี้: msg ตอนนี้เป็น String แล้ว จะแสดงผลข้อความได้ถูกต้อง
-          Swal.fire({ 
-            icon: msg.includes('✅') ? 'success' : 'error', 
-            title: msg.includes('✅') ? 'สำเร็จ' : 'แจ้งเตือน', 
-            text: msg, 
-            confirmButtonText: 'ตกลง' 
-          })
-          .then(() => {
-             if(msg.includes('✅')) location.reload();
-             else document.getElementById('btnSubmit').disabled = false;
-          });
-        })
-        .withFailureHandler(err => {
-          document.getElementById('loader').style.display = 'none';
-          document.getElementById('btnSubmit').disabled = false;
-          Swal.fire('Error', err.toString(), 'error');
-        })
-        .processForm(this);
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const res = await response.json();
+        document.getElementById('loader').style.display = 'none';
+        Swal.fire('สำเร็จ', res.message, 'success').then(() => location.reload());
+      } catch (err) {
+        document.getElementById('loader').style.display = 'none';
+        Swal.fire('Error', 'บันทึกไม่สำเร็จ', 'error');
+      }
     });
   </script>
 </body>
