@@ -2,48 +2,50 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ระบบจองคิวรถ</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    body { font-family: 'Prompt', sans-serif; background-color: #f0f2f5; padding: 10px; }
+    :root { --primary-blue: #0d6efd; --bg-gray: #f0f2f5; }
+    body { background-color: var(--bg-gray); font-family: 'Prompt', sans-serif; padding: 10px; }
     .app-container { max-width: 500px; margin: auto; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
-    .app-header { background: #0d6efd; color: white; padding: 25px; text-align: center; }
+    .app-header { background: var(--primary-blue); color: white; padding: 25px; text-align: center; }
     .form-section { padding: 20px; }
-    .farmer-info-card { background: #f8faff; border: 1px solid #dee2e6; border-radius: 12px; padding: 15px; margin: 15px 0; }
+    .farmer-info-card { background: #f8faff; border: 1px dashed #0d6efd; border-radius: 12px; padding: 15px; margin: 15px 0; }
     .info-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
+    #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
     .btn-submit { padding: 15px; font-weight: 600; border-radius: 12px; }
-    #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
   </style>
 </head>
 <body>
 
 <div id="loader">
   <div class="spinner-border text-primary"></div>
-  <p class="mt-2 fw-bold">กำลังดำเนินการ...</p>
+  <p class="mt-2 fw-bold">กำลังประมวลผล...</p>
 </div>
 
 <div class="app-container">
-  <div class="app-header">
-    <h4 class="mb-0">ระบบจองคิวรถ</h4>
+  <div class="app-header shadow-sm">
+    <h3 class="mb-1">ระบบจองคิวรถ</h3>
+    <p class="mb-0 opacity-75 small">ดึงข้อมูลจากระบบ Google Sheets</p>
   </div>
 
   <div class="form-section">
     <form id="bookingForm">
       <div class="mb-3">
-        <label class="form-label small">📅 วันที่เข้า</label>
+        <label class="form-label small fw-bold">📅 วันที่เข้า</label>
         <input type="date" id="dateInput" class="form-control" required>
       </div>
 
       <div class="mb-3">
-        <label class="form-label small">⏰ ช่วงเวลา</label>
+        <label class="form-label small fw-bold">⏰ ช่วงเวลา</label>
         <select id="timeslot" class="form-select"></select>
       </div>
 
       <div class="mb-3">
-        <label class="form-label small">🚛 ประเภทรถ</label>
+        <label class="form-label small fw-bold">🚛 ประเภทรถ</label>
         <select id="carTypeSelect" class="form-select" onchange="toggleTrailer()">
           <option value="สิบล้อ">สิบล้อ</option>
           <option value="หกล้อ">หกล้อ</option>
@@ -54,41 +56,41 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label small">🆔 ทะเบียนรถ</label>
-        <input type="text" id="plate" class="form-control" placeholder="เช่น 80-1234" required>
+        <label class="form-label small fw-bold">🆔 ทะเบียนรถ</label>
+        <input type="text" id="plate" class="form-control" placeholder="89-XXXX" required>
       </div>
 
       <div id="divTrailer" class="mb-3" style="display:none;">
-        <label class="form-label small text-danger">🆔 ทะเบียนลูกพ่วง</label>
+        <label class="form-label small fw-bold text-danger">🆔 ทะเบียนลูกพ่วง</label>
         <input type="text" id="iTrailer" class="form-control">
       </div>
 
       <div class="mb-3">
-        <label class="form-label small fw-bold">🔢 เลขโควตาชาวไร่ (8 หลัก)</label>
-        <input type="number" id="qInput" class="form-control border-primary" placeholder="พิมพ์เพื่อค้นหา..." oninput="searchData()">
+        <label class="form-label small fw-bold text-primary">🔢 เลขโควตาชาวไร่ (8 หลัก)</label>
+        <input type="number" id="qInput" class="form-control border-primary" placeholder="พิมพ์เลขโควตาเพื่อค้นหา..." oninput="searchData()">
       </div>
 
-      <div class="farmer-info-card">
+      <div class="farmer-info-card shadow-sm">
         <div class="info-line"><span>ชื่อชาวไร่:</span><span id="vFarmer" class="fw-bold text-primary">-</span></div>
         <div class="info-line"><span>นักเกษตร:</span><span id="vOfficer">-</span></div>
-        <div class="info-line"><span>เบอร์โทร:</span><span id="vPhone">-</span></div>
+        <div class="info-line"><span>เบอร์โทร:</span><span id="vPhone" class="text-success">-</span></div>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-submit w-100 shadow-sm">ยืนยันการจองคิว</button>
+      <button type="submit" class="btn btn-primary btn-submit w-100 shadow-sm mt-3">ยืนยันการจองคิว</button>
     </form>
   </div>
 </div>
 
 <script>
-  // ลิงก์ไฟล์ที่ 1 (สถานะ)
-  const CSV_SOURCE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRbEDGmPQBvhjfD6GmwALpmrTH8jNuEGoe3eUVANXZtvFuG8PTNDFNOsUfi6xZYO98D8JBY3ghQ82CQ/pub?gid=151049282&single=true&output=csv';
+  // ลิงก์ HTML ที่คุณส่งมา (ชีทสถานะ)
+  const SOURCE_HTML_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRbEDGmPQBvhjfD6GmwALpmrTH8jNuEGoe3eUVANXZtvFuG8PTNDFNOsUfi6xZYO98D8JBY3ghQ82CQ/pubhtml?gid=151049282&single=true';
   
-  // URL ของ Web App จาก Google Apps Script (ไฟล์ที่ 2)
-  const SCRIPT_URL = 'ใส่_WEB_APP_URL_ของคุณที่นี่';
+  // URL Web App จาก Google Apps Script (ไฟล์ปลายทาง)
+  const SCRIPT_URL = 'ใส่_URL_WEB_APP_ที่นี่';
 
   let farmerData = null;
+  let searchTimer;
 
-  // ตั้งค่าเริ่มต้น
   window.onload = () => {
     document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
     const s = document.getElementById('timeslot');
@@ -101,38 +103,59 @@
     document.getElementById('iTrailer').required = isP;
   }
 
-  // ฟังก์ชันค้นหาข้อมูล (ใช้ Proxy เพื่อความชัวร์ 100%)
+  // ค้นหาข้อมูลจากหน้า HTML ผ่าน Proxy
   async function searchData() {
     const q = document.getElementById('qInput').value.trim();
-    if (q.length < 3) return;
+    if (q.length < 3) { resetInfo(); return; }
 
     document.getElementById('vFarmer').innerText = "กำลังค้นหา...";
+    
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(async () => {
+      try {
+        // ใช้ Proxy เพื่อดึงข้อมูลข้ามโดเมน
+        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(SOURCE_HTML_URL + '&t=' + Date.now());
+        const response = await fetch(proxyUrl);
+        const json = await response.json();
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(json.contents, 'text/html');
+        const rows = Array.from(doc.querySelectorAll('tr'));
+        
+        let found = null;
+        for (let row of rows) {
+          const cells = Array.from(row.querySelectorAll('td'));
+          if (cells.length > 0 && cells[0].innerText.trim() === q) {
+            found = cells.map(c => c.innerText.trim());
+            break;
+          }
+        }
 
-    try {
-      const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(CSV_SOURCE + '&cache=' + Date.now());
-      const response = await fetch(proxyUrl);
-      const json = await response.json();
-      const rows = json.contents.split('\n').map(r => r.split(',').map(c => c.replace(/"/g, '').trim()));
-      
-      const found = rows.find(r => r[0] === q);
-      if (found) {
-        document.getElementById('vFarmer').innerText = found[1];
-        document.getElementById('vOfficer').innerText = found[2];
-        document.getElementById('vPhone').innerText = found[3] || "-";
-        farmerData = { name: found[1], officer: found[2], phone: found[3] || "-" };
-      } else {
-        document.getElementById('vFarmer').innerText = "ไม่พบข้อมูล";
-        farmerData = null;
+        if (found) {
+          document.getElementById('vFarmer').innerText = found[1] || "-";
+          document.getElementById('vOfficer').innerText = found[2] || "-";
+          document.getElementById('vPhone').innerText = found[3] || "-";
+          farmerData = { name: found[1], officer: found[2], phone: found[3] || "-" };
+        } else {
+          document.getElementById('vFarmer').innerText = "❌ ไม่พบโควตานี้";
+          farmerData = null;
+        }
+      } catch (e) {
+        document.getElementById('vFarmer').innerText = "⚠️ การเชื่อมต่อติดขัด";
       }
-    } catch (e) {
-      document.getElementById('vFarmer').innerText = "เชื่อมต่อล้มเหลว";
-    }
+    }, 600);
   }
 
-  // ส่งข้อมูลบันทึก
+  function resetInfo() {
+    document.getElementById('vFarmer').innerText = "-";
+    document.getElementById('vOfficer').innerText = "-";
+    document.getElementById('vPhone').innerText = "-";
+    farmerData = null;
+  }
+
   document.getElementById('bookingForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!farmerData) return Swal.fire('ผิดพลาด', 'ไม่พบข้อมูลชาวไร่', 'error');
+    if (!farmerData) return Swal.fire('แจ้งเตือน', 'ไม่พบข้อมูลเลขโควตา', 'warning');
 
     document.getElementById('loader').style.display = 'flex';
     const payload = {
@@ -152,11 +175,11 @@
       const out = await res.json();
       document.getElementById('loader').style.display = 'none';
       if (out.success) {
-        Swal.fire('สำเร็จ', 'บันทึกการจองเรียบร้อย', 'success').then(() => location.reload());
+        Swal.fire('สำเร็จ', out.message, 'success').then(() => location.reload());
       }
     } catch (err) {
       document.getElementById('loader').style.display = 'none';
-      Swal.fire('Error', 'บันทึกไม่สำเร็จ ตรวจสอบสิทธิ์สคริปต์', 'error');
+      Swal.fire('Error', 'บันทึกไม่สำเร็จ ตรวจสอบ Web App URL', 'error');
     }
   });
 </script>
