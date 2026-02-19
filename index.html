@@ -2,47 +2,48 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจองคิวรถ</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    :root { --primary-blue: #0d6efd; --bg-gray: #f0f2f5; }
-    body { background-color: var(--bg-gray); font-family: 'Prompt', sans-serif; }
-    .app-container { max-width: 480px; margin: auto; min-height: 100vh; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
-    .app-header { background: var(--primary-blue); color: white; padding: 30px 20px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; margin-bottom: 25px; }
-    .form-section { padding: 0 20px 30px 20px; }
-    .form-control, .form-select { border-radius: 12px; padding: 12px 15px; margin-bottom: 10px; }
-    .farmer-info-card { background: #f8faff; border: 1px dashed #0d6efd; border-radius: 15px; padding: 15px; margin: 20px 0; }
-    .info-item { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #edf2f7; padding-bottom: 5px; }
-    .info-label { color: #718096; font-size: 0.85rem; }
-    .info-value { font-weight: 600; color: #2d3748; }
-    #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 10000; justify-content: center; align-items: center; flex-direction: column; }
+    body { font-family: 'Prompt', sans-serif; background-color: #f0f2f5; padding: 10px; }
+    .app-container { max-width: 500px; margin: auto; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+    .app-header { background: #0d6efd; color: white; padding: 25px; text-align: center; }
+    .form-section { padding: 20px; }
+    .farmer-info-card { background: #f8faff; border: 1px solid #dee2e6; border-radius: 12px; padding: 15px; margin: 15px 0; }
+    .info-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
+    .btn-submit { padding: 15px; font-weight: 600; border-radius: 12px; }
+    #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
   </style>
 </head>
 <body>
 
-  <div id="loader">
-    <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;"></div>
-    <p class="mt-3 fw-bold">กำลังบันทึกข้อมูล...</p>
+<div id="loader">
+  <div class="spinner-border text-primary"></div>
+  <p class="mt-2 fw-bold">กำลังดำเนินการ...</p>
+</div>
+
+<div class="app-container">
+  <div class="app-header">
+    <h4 class="mb-0">ระบบจองคิวรถ</h4>
   </div>
 
-  <div class="app-container">
-    <div class="app-header shadow">
-      <h3 class="mb-1">ระบบจองคิวรถ</h3>
-      <p class="mb-0 opacity-75 small">กรุณากรอกข้อมูลเพื่อจองคิว</p>
-    </div>
-
-    <div class="form-section">
-      <form id="bookingForm">
-        <label class="form-label small fw-bold">📅 วันที่ต้องการเข้า</label>
+  <div class="form-section">
+    <form id="bookingForm">
+      <div class="mb-3">
+        <label class="form-label small">📅 วันที่เข้า</label>
         <input type="date" id="dateInput" class="form-control" required>
+      </div>
 
-        <label class="form-label small fw-bold">⏰ ช่วงเวลา</label>
+      <div class="mb-3">
+        <label class="form-label small">⏰ ช่วงเวลา</label>
         <select id="timeslot" class="form-select"></select>
+      </div>
 
-        <label class="form-label small fw-bold">🚛 ประเภทรถ</label>
+      <div class="mb-3">
+        <label class="form-label small">🚛 ประเภทรถ</label>
         <select id="carTypeSelect" class="form-select" onchange="toggleTrailer()">
           <option value="สิบล้อ">สิบล้อ</option>
           <option value="หกล้อ">หกล้อ</option>
@@ -50,119 +51,114 @@
           <option value="อีแต๋น">อีแต๋น</option>
           <option value="เทรลเลอร์">เทรลเลอร์</option>
         </select>
+      </div>
 
-        <div id="divPlate">
-          <label class="form-label small fw-bold">🆔 ทะเบียนรถ</label>
-          <input type="text" id="plate" class="form-control" placeholder="89-XXXX" required>
-        </div>
-        
-        <div id="divTrailer" style="display:none;">
-          <label class="form-label small fw-bold text-danger">🆔 ทะเบียนลูกพ่วง</label>
-          <input type="text" id="iTrailer" class="form-control" placeholder="89-XXXX">
-        </div>
+      <div class="mb-3">
+        <label class="form-label small">🆔 ทะเบียนรถ</label>
+        <input type="text" id="plate" class="form-control" placeholder="เช่น 80-1234" required>
+      </div>
 
-        <label class="form-label small fw-bold">🔢 เลขโควตาชาวไร่</label>
-        <input type="number" id="qInput" class="form-control border-primary" inputmode="numeric" placeholder="ระบุเลขโควตา" oninput="searchData()">
+      <div id="divTrailer" class="mb-3" style="display:none;">
+        <label class="form-label small text-danger">🆔 ทะเบียนลูกพ่วง</label>
+        <input type="text" id="iTrailer" class="form-control">
+      </div>
 
-        <div class="farmer-info-card">
-          <div class="info-item"><span class="info-label">ชื่อชาวไร่</span><span id="vFarmer" class="info-value text-primary">-</span></div>
-          <div class="info-item"><span class="info-label">นักเกษตรดูแล</span><span id="vOfficer" class="info-value">-</span></div>
-          <div class="info-item" style="border:none;"><span class="info-label">เบอร์โทรศัพท์</span><span id="vPhone" class="info-value text-success">-</span></div>
-        </div>
+      <div class="mb-3">
+        <label class="form-label small fw-bold">🔢 เลขโควตาชาวไร่ (8 หลัก)</label>
+        <input type="number" id="qInput" class="form-control border-primary" placeholder="พิมพ์เพื่อค้นหา..." oninput="searchData()">
+      </div>
 
-        <button type="submit" id="btnSubmit" class="btn btn-primary w-100 p-3 shadow-sm fw-bold" style="border-radius:15px;">ยืนยันการจองคิว</button>
-      </form>
-    </div>
+      <div class="farmer-info-card">
+        <div class="info-line"><span>ชื่อชาวไร่:</span><span id="vFarmer" class="fw-bold text-primary">-</span></div>
+        <div class="info-line"><span>นักเกษตร:</span><span id="vOfficer">-</span></div>
+        <div class="info-line"><span>เบอร์โทร:</span><span id="vPhone">-</span></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-submit w-100 shadow-sm">ยืนยันการจองคิว</button>
+    </form>
   </div>
+</div>
 
-  <script>
-    // 1. ลิงก์ดึงข้อมูลจากไฟล์ที่ 1 (ต้องเป็น CSV เพื่อความเร็ว)
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRbEDGmPQBvhjfD6GmwALpmrTH8jNuEGoe3eUVANXZtvFuG8PTNDFNOsUfi6xZYO98D8JBY3ghQ82CQ/pub?gid=151049282&single=true&output=csv';
-    
-    // 2. URL ของ Web App ที่ได้จากการ Deploy Google Apps Script ในไฟล์ที่ 2
-    const SCRIPT_URL = 'ใส่_WEB_APP_URL_ของคุณที่นี่';
+<script>
+  // ลิงก์ไฟล์ที่ 1 (สถานะ)
+  const CSV_SOURCE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRbEDGmPQBvhjfD6GmwALpmrTH8jNuEGoe3eUVANXZtvFuG8PTNDFNOsUfi6xZYO98D8JBY3ghQ82CQ/pub?gid=151049282&single=true&output=csv';
+  
+  // URL ของ Web App จาก Google Apps Script (ไฟล์ที่ 2)
+  const SCRIPT_URL = 'ใส่_WEB_APP_URL_ของคุณที่นี่';
 
-    let farmerData = null;
+  let farmerData = null;
 
-    window.onload = () => {
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('dateInput').value = today;
-      const s = document.getElementById('timeslot');
-      const slots = ["08:01 - 09:00", "09:01 - 10:00", "10:01 - 11:00", "11:01 - 12:00", "12:01 - 13:00", "13:01 - 14:00", "14:01 - 15:00", "15:01 - 16:00", "16:01 - 17:00", "17:01 - 18:00", "18:01 - 19:00", "19:01 - 20:00", "20:01 - 21:00", "21:01 - 22:00", "22:01 - 23:00", "23:01 - 00:00", "00:01 - 02:00", "02:01 - 03:00", "03:01 - 04:00", "04:01 - 05:00", "05:01 - 06:00", "06:01 - 07:00", "07:01 - 08:00"];
-      slots.forEach(t => s.options.add(new Option(t, t)));
+  // ตั้งค่าเริ่มต้น
+  window.onload = () => {
+    document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+    const s = document.getElementById('timeslot');
+    ["08:01-09:00", "09:01-10:00", "10:01-11:00", "11:01-12:00", "12:01-13:00", "13:01-14:00", "14:01-15:00", "15:01-16:00", "16:01-17:00", "17:01-18:00", "18:01-19:00", "19:01-20:00", "20:01-21:00", "21:01-22:00", "22:01-23:00", "23:01-00:00", "00:01-02:00", "02:01-03:00", "03:01-04:00", "04:01-05:00", "05:01-06:00", "06:01-07:00", "07:01-08:00"].forEach(t => s.options.add(new Option(t, t)));
+  };
+
+  function toggleTrailer() {
+    const isP = document.getElementById('carTypeSelect').value === 'แม่พ่วงและลูกพ่วง';
+    document.getElementById('divTrailer').style.display = isP ? 'block' : 'none';
+    document.getElementById('iTrailer').required = isP;
+  }
+
+  // ฟังก์ชันค้นหาข้อมูล (ใช้ Proxy เพื่อความชัวร์ 100%)
+  async function searchData() {
+    const q = document.getElementById('qInput').value.trim();
+    if (q.length < 3) return;
+
+    document.getElementById('vFarmer').innerText = "กำลังค้นหา...";
+
+    try {
+      const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(CSV_SOURCE + '&cache=' + Date.now());
+      const response = await fetch(proxyUrl);
+      const json = await response.json();
+      const rows = json.contents.split('\n').map(r => r.split(',').map(c => c.replace(/"/g, '').trim()));
+      
+      const found = rows.find(r => r[0] === q);
+      if (found) {
+        document.getElementById('vFarmer').innerText = found[1];
+        document.getElementById('vOfficer').innerText = found[2];
+        document.getElementById('vPhone').innerText = found[3] || "-";
+        farmerData = { name: found[1], officer: found[2], phone: found[3] || "-" };
+      } else {
+        document.getElementById('vFarmer').innerText = "ไม่พบข้อมูล";
+        farmerData = null;
+      }
+    } catch (e) {
+      document.getElementById('vFarmer').innerText = "เชื่อมต่อล้มเหลว";
+    }
+  }
+
+  // ส่งข้อมูลบันทึก
+  document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!farmerData) return Swal.fire('ผิดพลาด', 'ไม่พบข้อมูลชาวไร่', 'error');
+
+    document.getElementById('loader').style.display = 'flex';
+    const payload = {
+      date: document.getElementById('dateInput').value,
+      timeslot: document.getElementById('timeslot').value,
+      carType: document.getElementById('carTypeSelect').value,
+      plate: document.getElementById('plate').value,
+      trailerPlate: document.getElementById('iTrailer').value,
+      quota: document.getElementById('qInput').value,
+      farmerName: farmerData.name,
+      officerName: farmerData.officer,
+      phone: farmerData.phone
     };
 
-    function toggleTrailer() {
-      const isP = document.getElementById('carTypeSelect').value === 'แม่พ่วงและลูกพ่วง';
-      document.getElementById('divTrailer').style.display = isP ? 'block' : 'none';
-      document.getElementById('iTrailer').required = isP;
-    }
-
-    // ฟังก์ชันค้นหาข้อมูลแบบสายฟ้าแลบ (ไม่ผ่าน Apps Script)
-    async function searchData() {
-      const q = document.getElementById('qInput').value.trim();
-      if(q.length < 5) { resetInfo(); return; }
-
-      try {
-        const response = await fetch(CSV_URL);
-        const text = await response.text();
-        const rows = text.split('\n').map(row => row.split(','));
-        
-        // สมมติ Column A=โควตา(0), B=ชื่อ(1), C=นักเกษตร(2), D=เบอร์(3)
-        const found = rows.find(r => r[0].trim() === q);
-
-        if(found) {
-          document.getElementById('vFarmer').innerText = found[1];
-          document.getElementById('vOfficer').innerText = found[2];
-          document.getElementById('vPhone').innerText = found[3] || "-";
-          farmerData = { name: found[1], officer: found[2], phone: found[3] || "-" };
-        } else {
-          document.getElementById('vFarmer').innerText = "ไม่พบข้อมูล";
-          resetInfo();
-        }
-      } catch (e) { console.error("Search Error:", e); }
-    }
-
-    function resetInfo() {
-      document.getElementById('vFarmer').innerText = "-";
-      document.getElementById('vOfficer').innerText = "-";
-      document.getElementById('vPhone').innerText = "-";
-      farmerData = null;
-    }
-
-    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if(!farmerData) return Swal.fire('แจ้งเตือน', 'กรุณาระบุเลขโควตาให้ถูกต้อง', 'warning');
-
-      document.getElementById('loader').style.display = 'flex';
-      
-      const payload = {
-        date: document.getElementById('dateInput').value,
-        timeslot: document.getElementById('timeslot').value,
-        carType: document.getElementById('carTypeSelect').value,
-        plate: document.getElementById('plate').value,
-        trailerPlate: document.getElementById('iTrailer').value,
-        quota: document.getElementById('qInput').value,
-        farmerName: farmerData.name,
-        officerName: farmerData.officer,
-        phone: farmerData.phone
-      };
-
-      try {
-        const res = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-        document.getElementById('loader').style.display = 'none';
-        if(result.success) {
-          Swal.fire('สำเร็จ', result.message, 'success').then(() => location.reload());
-        }
-      } catch (err) {
-        document.getElementById('loader').style.display = 'none';
-        Swal.fire('Error', 'ไม่สามารถบันทึกได้ กรุณาตรวจสอบการตั้งค่าสคริปต์', 'error');
+    try {
+      const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+      const out = await res.json();
+      document.getElementById('loader').style.display = 'none';
+      if (out.success) {
+        Swal.fire('สำเร็จ', 'บันทึกการจองเรียบร้อย', 'success').then(() => location.reload());
       }
-    });
-  </script>
+    } catch (err) {
+      document.getElementById('loader').style.display = 'none';
+      Swal.fire('Error', 'บันทึกไม่สำเร็จ ตรวจสอบสิทธิ์สคริปต์', 'error');
+    }
+  });
+</script>
 </body>
 </html>
